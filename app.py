@@ -9,7 +9,6 @@ app.config["SECRET_KEY"] = "this-is-secret"
 # The boggle games created, keyed by game id
 games = {}
 
-
 @app.get("/")
 def homepage():
     """Show board."""
@@ -26,12 +25,31 @@ def new_game():
     game = BoggleGame()
     games[game_id] = game
 
-    return jsonify({"gameId": game_id, "board": game.board})
+    return jsonify({"gameId":game_id, "board":game.board})
+# jsonify(gameId= game_id, board= game.board)
+
 
 @app.post("/api/score-word")
 def score_word():
     """Check if a word is on the board and is a valid word"""
-    current_game = games[len(games) - 1]
-    current_game["game_id"].is_word_in_word_list()
+    # game = request.json
+    # game_id = game["gameId"]
+    # word = game["word"].upper()
+    # current_game = games.get(game_id)
 
+    word = request.json["word"].upper()
+    game_id = request.json["gameId"]
+    game = games[game_id]
+
+
+    word_in_list = game.is_word_in_word_list(word)
+    word_on_board = game.check_word_on_board(word)
+
+    if word_in_list is False:
+        return jsonify({"result": "not-word"})
+
+    if word_on_board is False:
+        return jsonify({"result": "not-on-board"})
+
+    return jsonify({"result": "ok"})
 
